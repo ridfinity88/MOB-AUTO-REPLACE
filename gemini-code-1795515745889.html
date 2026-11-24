@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOB AUTO REPLACE</title>
+    <!-- Google Fonts: Sarabun & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SheetJS Library -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #eef2ff;
+            --success: #10b981;
+            --success-hover: #059669;
+            --success-light: #ecfdf5;
+            --danger: #ef4444;
+            --danger-light: #fef2f2;
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 14px;
+            --shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Sarabun', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 640px;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Header / Topbar */
+        .app-header {
+            padding: 20px 28px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-title h1 {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: 0.3px;
+            line-height: 1.2;
+        }
+
+        .brand-title p {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 9px 16px;
+            border-radius: 9px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-outline {
+            background: #ffffff;
+            border-color: var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+            width: 100%;
+            padding: 13px 20px;
+            font-size: 15.5px;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #ffffff;
+            width: 100%;
+            padding: 13px 20px;
+            font-size: 15.5px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+
+        .btn-success:hover {
+            background: var(--success-hover);
+        }
+
+        .btn-ghost-danger {
+            background: transparent;
+            color: var(--text-muted);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .btn-ghost-danger:hover {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        /* Content Body */
+        .view-section {
+            padding: 28px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Dropzone Area */
+        .dropzone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 44px 24px;
+            text-align: center;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .dropzone:hover, .dropzone.drag-over {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .dropzone-icon {
+            width: 52px;
+            height: 52px;
+            margin: 0 auto 14px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .dropzone-title {
+            font-size: 15.5px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .dropzone-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Selected File Card */
+        .file-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-top: 18px;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        .file-badge {
+            background: #dcfce7;
+            color: #15803d;
+            font-weight: 700;
+            font-size: 11px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .file-details {
+            overflow: hidden;
+        }
+
+        .file-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-size {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .action-area {
+            margin-top: 22px;
+        }
+
+        /* Status Alert */
+        .status-alert {
+            margin-top: 18px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            background: var(--success-light);
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            line-height: 1.4;
+        }
+
+        /* Settings View */
+        .settings-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .settings-header h2 {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .target-badge {
+            font-size: 12.5px;
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .mapping-table-header {
+            display: grid;
+            grid-template-columns: 1fr 24px 1fr 38px;
+            gap: 10px;
+            padding: 0 4px 8px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .mapping-list {
+            max-height: 310px;
+            overflow-y: auto;
+            padding-right: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .mapping-row {
+            display: grid;
+            grid-template-columns: 1fr 24px 1fr 38px;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .mapping-row input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text-main);
+            transition: border-color 0.2s;
+        }
+
+        .mapping-row input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .arrow-icon {
+            text-align: center;
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        .settings-footer {
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1e293b;
+            color: #ffffff;
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 999;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Top Navigation Bar -->
+    <header class="app-header">
+        <div class="brand">
+            <div class="brand-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <path d="M8 13h2"></path><path d="M8 17h2"></path>
+                    <path d="M14 13h2"></path><path d="M14 17h2"></path>
+                </svg>
+            </div>
+            <div class="brand-title">
+                <h1>MOB AUTO REPLACE</h1>
+                <p id="headerSubtitle" class="hidden"></p>
+            </div>
+        </div>
+
+        <!-- ปุ่มสลับหน้า (ตั้งค่า / กลับหน้าหลัก) -->
+        <button id="navSettingsBtn" class="btn btn-outline" onclick="switchView('settings')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            ตั้งค่า
+        </button>
+
+        <button id="navHomeBtn" class="btn btn-outline hidden" onclick="switchView('home')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            กลับหน้าหลัก
+        </button>
+    </header>
+
+    <!-- ========================================== -->
+    <!-- หน้า 1: หน้าหลัก (แนบไฟล์ & เริ่มแก้ไข)         -->
+    <!-- ========================================== -->
+    <main id="homeView" class="view-section">
+        <!-- พื้นที่อัปโหลดไฟล์ -->
+        <div id="dropzone" class="dropzone" onclick="document.getElementById('excelFile').click()">
+            <input type="file" id="excelFile" accept=".xlsx, .xls" class="hidden" onchange="handleFileSelect(this.files[0])">
+            <div class="dropzone-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+            </div>
+            <div class="dropzone-title">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์ Excel มาวางที่นี่</div>
+            <div class="dropzone-subtitle">รองรับไฟล์นามสกุล .xlsx และ .xls</div>
+        </div>
+
+        <!-- การ์ดแสดงชื่อไฟล์ที่เลือก -->
+        <div id="fileCard" class="file-card hidden">
+            <div class="file-info">
+                <span class="file-badge">XLSX</span>
+                <div class="file-details">
+                    <div id="displayFileName" class="file-name">filename.xlsx</div>
+                    <div id="displayFileSize" class="file-size">0 KB</div>
+                </div>
+            </div>
+            <button type="button" class="btn-ghost-danger" title="นำไฟล์ออก" onclick="resetFile()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <!-- ปุ่มดำเนินการ (แสดงหลังแนบไฟล์) -->
+        <div id="actionArea" class="action-area hidden">
+            <button id="processBtn" class="btn btn-primary" onclick="processExcel()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                เริ่มแก้ไข
+            </button>
+
+            <button id="downloadBtn" class="btn btn-success hidden" onclick="downloadExcel()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                ดาวน์โหลดไฟล์ที่แก้ไขแล้ว
+            </button>
+        </div>
+
+        <!-- กล่องสรุปผลการแก้ไข -->
+        <div id="statusAlert" class="status-alert hidden">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <div id="statusText"></div>
+        </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- หน้า 2: หน้าตั้งค่า (กำหนดค่าเดิม -> ค่าใหม่)     -->
+    <!-- ========================================== -->
+    <section id="settingsView" class="view-section hidden">
+        <div class="settings-header">
+            <h2>กำหนดข้อมูลที่ต้องการแก้ไข</h2>
+            <span class="target-badge">คอลัมน์เป้าหมาย: G</span>
+        </div>
+
+        <div class="mapping-table-header">
+            <div>ค่าเดิมในคอลัมน์ G</div>
+            <div></div>
+            <div>ค่าใหม่ที่ต้องการแทนที่</div>
+            <div></div>
+        </div>
+
+        <div id="mappingList" class="mapping-list">
+            <!-- รายการจะถูกสร้างด้วย JavaScript -->
+        </div>
+
+        <div class="settings-footer">
+            <button type="button" class="btn btn-outline" onclick="addMappingRow()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                เพิ่มรายการ
+            </button>
+
+            <button type="button" class="btn btn-primary" style="width: auto; padding: 10px 24px;" onclick="saveSettings()">
+                บันทึกการตั้งค่า
+            </button>
+        </div>
+    </section>
+</div>
+
+<!-- Toast แจ้งเตือน -->
+<div id="toast" class="toast">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    <span id="toastMessage">บันทึกการตั้งค่าเรียบร้อยแล้ว</span>
+</div>
+
+<script>
+    // กำหนดคอลัมน์ตายตัวเป็น G ตามที่ระบุ
+    const TARGET_COLUMN = 'G';
+    const STORAGE_KEY = 'excel_mapper_rules_v1';
+
+    // ค่าเริ่มต้นกรณีเปิดใช้งานครั้งแรก
+    const DEFAULT_RULES = [
+        { key: 'A', value: 'ASB58756' }
+    ];
+
+    let selectedFile = null;
+    let currentWorkbook = null;
+
+    // โหลดข้อมูลการตั้งค่าเมื่อเปิดหน้าเว็บ
+    window.addEventListener('DOMContentLoaded', () => {
+        renderMappingRows(loadRules());
+        setupDragAndDrop();
+    });
+
+    // จัดการสลับหน้า Home <-> Settings
+    function switchView(viewName) {
+        const homeView = document.getElementById('homeView');
+        const settingsView = document.getElementById('settingsView');
+        const navSettingsBtn = document.getElementById('navSettingsBtn');
+        const navHomeBtn = document.getElementById('navHomeBtn');
+        const subtitle = document.getElementById('headerSubtitle');
+
+        if (viewName === 'settings') {
+            renderMappingRows(loadRules());
+            homeView.classList.add('hidden');
+            settingsView.classList.remove('hidden');
+            navSettingsBtn.classList.add('hidden');
+            navHomeBtn.classList.remove('hidden');
+            subtitle.textContent = 'ตั้งค่าเงื่อนไขการแทนที่ข้อมูล (คอลัมน์ G)';
+            subtitle.classList.remove('hidden');
+        } else {
+            settingsView.classList.add('hidden');
+            homeView.classList.remove('hidden');
+            navHomeBtn.classList.add('hidden');
+            navSettingsBtn.classList.remove('hidden');
+            subtitle.classList.add('hidden');
+        }
+    }
+
+    // โหลด Rules จาก localStorage
+    function loadRules() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            } catch (e) {}
+        }
+        return DEFAULT_RULES;
+    }
+
+    // แสดงรายการในหน้าตั้งค่า
+    function renderMappingRows(rules) {
+        const container = document.getElementById('mappingList');
+        container.innerHTML = '';
+        rules.forEach(rule => {
+            addMappingRow(rule.key, rule.value);
+        });
+    }
+
+    // เพิ่มแถวใหม่ในหน้าตั้งค่า
+    function addMappingRow(keyVal = '', newVal = '') {
+        const container = document.getElementById('mappingList');
+        const row = document.createElement('div');
+        row.className = 'mapping-row';
+        row.innerHTML = `
+            <input type="text" class="key-input" placeholder="เช่น A" value="${escapeHtml(keyVal)}">
+            <div class="arrow-icon">&rarr;</div>
+            <input type="text" class="val-input" placeholder="เช่น ASB58756" value="${escapeHtml(newVal)}">
+            <button type="button" class="btn-ghost-danger" title="ลบรายการ" onclick="removeMappingRow(this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+            </button>
+        `;
+        container.appendChild(row);
+    }
+
+    // ลบแถวในหน้าตั้งค่า
+    function removeMappingRow(btn) {
+        const rows = document.querySelectorAll('.mapping-row');
+        if (rows.length > 1) {
+            btn.closest('.mapping-row').remove();
+        } else {
+            const row = btn.closest('.mapping-row');
+            row.querySelector('.key-input').value = '';
+            row.querySelector('.val-input').value = '';
+        }
+    }
+
+    // บันทึกการตั้งค่าลง localStorage
+    function saveSettings() {
+        const rows = document.querySelectorAll('.mapping-row');
+        const newRules = [];
+
+        rows.forEach(row => {
+            const key = row.querySelector('.key-input').value.trim();
+            const value = row.querySelector('.val-input').value.trim();
+            if (key !== '') {
+                newRules.push({ key, value });
+            }
+        });
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newRules));
+        showToast(`บันทึกการตั้งค่าแล้ว (${newRules.length} รายการ)`);
+        
+        // กลับหน้าหลักอัตโนมัติหลังบันทึก
+        setTimeout(() => switchView('home'), 600);
+    }
+
+    // ระบบ Drag & Drop ไฟล์
+    function setupDragAndDrop() {
+        const dropzone = document.getElementById('dropzone');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, e => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => dropzone.classList.add('drag-over'));
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => dropzone.classList.remove('drag-over'));
+        });
+
+        dropzone.addEventListener('drop', e => {
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+    }
+
+    // เมื่อเลือกไฟล์ Excel
+    function handleFileSelect(file) {
+        if (!file) return;
+
+        const validExt = /\.(xlsx|xls)$/i;
+        if (!validExt.test(file.name)) {
+            alert('กรุณาเลือกไฟล์ Excel (.xlsx หรือ .xls) เท่านั้น');
+            return;
+        }
+
+        selectedFile = file;
+        currentWorkbook = null;
+
+        // อัปเดต UI แสดงข้อมูลไฟล์และปุ่ม "เริ่มแก้ไข"
+        document.getElementById('displayFileName').textContent = file.name;
+        document.getElementById('displayFileSize').textContent = formatBytes(file.size);
+        
+        document.getElementById('fileCard').classList.remove('hidden');
+        document.getElementById('actionArea').classList.remove('hidden');
+        document.getElementById('processBtn').classList.remove('hidden');
+        document.getElementById('downloadBtn').classList.add('hidden');
+        document.getElementById('statusAlert').classList.add('hidden');
+    }
+
+    // ล้างไฟล์ที่เลือก
+    function resetFile() {
+        selectedFile = null;
+        currentWorkbook = null;
+        document.getElementById('excelFile').value = '';
+        document.getElementById('fileCard').classList.add('hidden');
+        document.getElementById('actionArea').classList.add('hidden');
+        document.getElementById('statusAlert').classList.add('hidden');
+    }
+
+    // ประมวลผลแก้ไขข้อมูลในคอลัมน์ G
+    function processExcel() {
+        if (!selectedFile) return;
+
+        const rules = loadRules();
+        if (rules.length === 0) {
+            alert('ยังไม่มีข้อมูลการตั้งค่า กรุณากดปุ่ม "ตั้งค่า" เพื่อกำหนดข้อมูลก่อนครับ');
+            return;
+        }
+
+        // แปลง Rules เป็น Object เพื่อค้นหาได้รวดเร็ว O(1)
+        const mappingDict = {};
+        rules.forEach(item => {
+            mappingDict[item.key] = item.value;
+        });
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+
+            if (!worksheet['!ref']) {
+                alert('ไม่พบข้อมูลในไฟล์ Excel นี้');
+                return;
+            }
+
+            const range = XLSX.utils.decode_range(worksheet['!ref']);
+            let updatedCount = 0;
+
+            // วนลูปตรวจสอบเฉพาะคอลัมน์ G ทุกบรรทัด
+            for (let rowNum = range.s.r; rowNum <= range.e.r; rowNum++) {
+                const cellAddress = TARGET_COLUMN + (rowNum + 1);
+                const cell = worksheet[cellAddress];
+
+                if (cell && cell.v !== undefined) {
+                    const cellValue = String(cell.v).trim();
+                    if (Object.prototype.hasOwnProperty.call(mappingDict, cellValue)) {
+                        cell.v = mappingDict[cellValue];
+                        cell.t = 's';
+                        delete cell.w;
+                        updatedCount++;
+                    }
+                }
+            }
+
+            currentWorkbook = workbook;
+
+            // เปลี่ยนปุ่มเป็น "ดาวน์โหลด" และแสดงผลลัพธ์
+            document.getElementById('processBtn').classList.add('hidden');
+            document.getElementById('downloadBtn').classList.remove('hidden');
+
+            const statusAlert = document.getElementById('statusAlert');
+            const statusText = document.getElementById('statusText');
+            statusText.innerHTML = `แก้ไขข้อมูลเรียบร้อยแล้ว ตรวจสอบคอลัมน์ <strong>${TARGET_COLUMN}</strong> และอัปเดตทั้งหมด <strong>${updatedCount}</strong> รายการ`;
+            statusAlert.classList.remove('hidden');
+        };
+
+        reader.readAsArrayBuffer(selectedFile);
+    }
+
+    // ดาวน์โหลดไฟล์ที่แก้ไขแล้ว
+    function downloadExcel() {
+        if (!currentWorkbook || !selectedFile) return;
+        const newFileName = selectedFile.name.replace(/(\.[\w\d_-]+)$/i, '_edited$1');
+        XLSX.writeFile(currentWorkbook, newFileName);
+    }
+
+    // Helper Functions
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toastMessage').textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+</script>
+
+</body>
+</html>
